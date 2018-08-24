@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 from mineSweeperOnline import mineSweeperOnline
-import time
+from testing import testing
 
 class mineSolver():
     def __init__(self):
@@ -23,7 +23,7 @@ class mineSolver():
         self._knownMines = 0
         self._fieldDict = {}
 
-        self.timing = fileManagement("times.csv")
+        self.test = testing("times.csv")
 
     def convertToXY(self, num):
         y = int(num/self._width) + 1
@@ -77,8 +77,6 @@ class mineSolver():
                             temp.append(offsetLocation)
                         if(self._fieldDict[offsetLocation-1] == "bombflagged"):
                             flags+=1
-                    else:
-                        print("Offset:", offset, "bounced!")
                 if(blanks != 0): #takes out solved parts
                     percent = (number - flags)/blanks
                     for offset in temp:
@@ -90,17 +88,14 @@ class mineSolver():
                                 percentDict[offset] = percent
                         else:
                             percentDict[offset] = percent
-                else:
-                    print("um....", x, y)
         return(percentDict)
 
     def _findSafestCick(self, percentDict):
         lowest = 2.0
-        lowcation = -1
+        output = []
         for item in percentDict:
             if(percentDict[item] < lowest):
                 lowest = percentDict[item]
-                lowcation = item
         #Compare to percentage for a random click
         mines = self._game.getMinesRemaining()
         randomPercent = mines / (self._remaingBlankSquares)
@@ -127,16 +122,26 @@ class mineSolver():
                             offsetLocation = ((x+i) + (self._width)*(y+j-1))
                             if(offsetLocation not in forbidden):
                                 finalx,finaly = self.convertToXY(offsetLocation)
-                                return(finalx,finaly)
+                                output.append((finalx,finaly))
+                                print("Selected Random")
+                                return(output)
                 #Only makes it here if all non forbidden squares are taken
                 ans = list(percentDict.keys())[0]
                 finalx, finaly = self.convertToXY(ans)
-                return(finalx,finaly)
-            else:
-                return(int(self._width/2), int(self._height/2))
+                output.append((finalx,finaly))
+                print("Selected Last Resort")
+                return(output)
+            else: #First time through
+                output.append((int(self._width/2), int(self._height/2)))  #Start at 1/2 heigh 1/2 width
+                print("Selected Middle Tile")
+                return(output)
         else:
-            x,y = self.convertToXY(lowcation)
-            return(x,y)
+            print("Selected Logic: lowest = {0}".format(lowest))
+            for item in percentDict:
+                if(percentDict[item] == lowest):
+                    x,y = self.convertToXY(item)
+                    output.append((x,y))
+            return(output)
 
     def _checkForFlagging(self, percentDict):
         flagList = []
@@ -148,28 +153,35 @@ class mineSolver():
 
 
     def solve(self):
+        times = []
+
         self._createDict()
         gameOn = True
         while(gameOn):
+            self.test.start()
             percentDict = self._getPercentages()
-            for i in percentDict:
-                print(self.convertToXY(i), percentDict[i])
             flagList = self._checkForFlagging(percentDict)
             if(not flagList):
-                x,y = self._findSafestCick(percentDict)
-                print("clicking", x, y)
-                self._game.clickTile(x,y)
+                outputList = self._findSafestCick(percentDict)
+                print("{0} item(s) to be clicked...".format(len(outputList)))
+                for coordinates in outputList:
+                    x,y = coordinates
+                    print("clicking", x, y)
+                    self._game.clickTile(x,y)
             else:
                 while(flagList):
                     flagLocation = flagList.pop()
                     x,y = self.convertToXY(flagLocation)
                     self._game.flagTile(x,y)
                     #Updates the board before clicking anything on screen
+            print("updating....")
             self._updateDict()
             gameOn = not (self._game.isGameOver())
-        time.sleep(10*60)
-
-
+            t = self.test.stop()
+            print("Lap time: {0}".format(str(t)))
+            self.test.update()
+        self.test.avg()
+        self.test.saveAverage()
 
 def main():
     game = mineSolver()
