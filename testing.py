@@ -36,5 +36,5 @@ class testing():
         self._average = total / amount
         return(self._average)
     def saveAverage(self):
-        self._file.appendToFile(str(self._average))
+        self._file.appendToFile(str(self._average)+"\n")
 
