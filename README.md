@@ -8,12 +8,12 @@ Solves minesweeper quickly using selenium to interface with minesweeper.com
 ## Files
 **mineSweeperOnline.py**
 
-To interface with minesweeper.com using selenium
+- To interface with minesweeper.com using selenium
 
 **mineSolver.py**
 
-To solve minesweeper using the minesweeperonline object to interface with minesweeper.com
+- To solve minesweeper using the minesweeperonline object to interface with minesweeper.com
 
 **fileManagement.py**
 
-Contains a bunch of preset options for read/writing a file
+- Contains a bunch of preset options for read/writing a file
