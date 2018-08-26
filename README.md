@@ -2,10 +2,10 @@
 ## Purpose
 Solves minesweeper quickly using selenium to interface with minesweeper.com 
 
-##Dependencies
+## Dependencies
 - [selenium](https://selenium-python.readthedocs.io/)
 
-## Files:
+## Files
 Name:        mineSweeperOnline.py
 Purpose:     To interface with minesweeper.com using selenium
 
