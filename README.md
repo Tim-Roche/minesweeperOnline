@@ -6,14 +6,14 @@ Solves minesweeper quickly using selenium to interface with minesweeper.com
 - [selenium](https://selenium-python.readthedocs.io/)
 
 ## Files
-Name: mineSweeperOnline.py
+**mineSweeperOnline.py**
 
-Purpose: To interface with minesweeper.com using selenium
+To interface with minesweeper.com using selenium
 
-Name: mineSolver.py
+**mineSolver.py**
 
-Purpose: To solve minesweeper using the minesweeperonline object to interface with minesweeper.com
+To solve minesweeper using the minesweeperonline object to interface with minesweeper.com
 
-Name: fileManagement.py
+**fileManagement.py**
 
-Purpose: Contains a bunch of preset options for read/writing a file
+Contains a bunch of preset options for read/writing a file
