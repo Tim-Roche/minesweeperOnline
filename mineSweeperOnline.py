@@ -16,14 +16,17 @@ from selenium.webdriver.common.keys import Keys
 class mineSweeperOnline():
     def __init__(self):
         self.driverLocation = "C:\\Users\\TimRo\\chromedriver\\chromedriver.exe"
+        self.open()
+
+        #Default Settings
+        self.height = 16
+        self.width = 30
+        self.totalMines = 99
+
+    def open(self):
         self._driver = webdriver.Chrome(self.driverLocation)
         self._driver.get("http://minesweeperonline.com")
         self._gameElements = self._driver.find_element_by_id("game")
-
-        #Default Settings
-        self._height = 16
-        self._width = 30
-        self._totalMines = 99
 
     def setDifficulty(self, **args):
         """
@@ -39,36 +42,30 @@ class mineSweeperOnline():
             1 - Beginner
             2 - Intermediate
             3 - Expert
-            Custom (input your own values)
+           (4) Custom (input your own values)
         """
         level = 4
 
-        for arg in args:
-            lowercase = arg.lower()
-            if(lowercase == "level"):
-                level = int(args[arg])
-            if(lowercase == "height"):
-                self._height = int(args[arg])
-            if(lowercase == "width"):
-                self._width = int(args[arg])
-            if(lowercase == "mines"):
-                self._totalMines = int(args[arg])
+        if("level" in args):
+            level = int(args[arg])
 
         levelDict = {}
-        #               [Level,    H, W, Bombs]
-        levelDict[1] = ["beginner", 9, 9, 10]
-        levelDict[2] = ["intermediate", 16, 16, 40]
-        levelDict[3] = ["expert", 16, 30, 99]
-        levelDict[4] = ["custom", 20, 30, 145]
+        levelDict[1] = "beginner"
+        levelDict[2] = "intermediate"
+        levelDict[3] = "expert"
+        levelDict[4] = "custom"
 
         link = self._driver.find_element_by_id("options-link")
         link.click()
         options = self._driver.find_element_by_id("options-form")
-        item = options.find_element_by_id(levelDict[level][0])
+        item = options.find_element_by_id(levelDict[level])
         item.click()
 
         if(level == 4):
-            customDict = {"custom_height":self._height, "custom_width":self._width,"custom_mines":self._totalMines}
+            self.height = int(args["height"])
+            self.width = int(args["width"])
+            self.totalMines = int(args["totalMines"])
+            customDict = {"custom_height":self.height, "custom_width":self.width,"custom_mines":self.totalMines}
             for custom in customDict:
                 item = options.find_element_by_id(custom)
                 item.clear()
@@ -133,6 +130,11 @@ class mineSweeperOnline():
         mood = face.get_attribute("class")
         return(mood)
 
+    def reset(self):
+        face = self._gameElements.find_element_by_id("face")
+        face.click()
+
+
     def isGameOver(self):
         """
         True = game over
@@ -171,11 +173,11 @@ class mineSweeperOnline():
     def closeWebpage(self):
         self._driver.close()
     def getBoardHeight(self):
-        return(self._height)
+        return(self.height)
     def getBoardWidth(self):
-        return(self._width)
+        return(self.width)
     def getBoardTotalMines(self):
-        return(self._totalMines)
+        return(self.totalMines)
 
 def main():
     pass

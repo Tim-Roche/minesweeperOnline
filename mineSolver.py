@@ -16,30 +16,49 @@ from fileManagement import fileManagement
 from datetime import datetime
 import time
 
-class mineSolver():
-    def __init__(self):
-        self._game = mineSweeperOnline()
-        self._height = self._game.getBoardHeight()
-        self._width = self._game.getBoardWidth()
-        self._area = self._height * self._width
-        self._totalMines = self._game.getBoardTotalMines()
+class mineSolver(mineSweeperOnline):
+    def __init__(self, **args):
+        """
+        Params: **args
+        All Params:
+            No Param will result in level 3 being selected
+            level = (1-3)
+            Or custom:
+                height = ??
+                width = ??
+                mines = ??
+
+        Dificulty levels are:
+            1 - Beginner
+            2 - Intermediate
+            3 - Expert
+            Custom (input your own values)
+        """
+        super().__init__(**args)
+        self._area = self.height * self.width
+
+        self.totalMines = self.getBoardTotalMines()
         self._remaingBlankSquares = 0
         self._fieldDict = {}
-
-        self._firstX = int(self._width/2)
-        self._firstY = int(self._height/2)
-        location = self.convertToLocation(self._firstX,self._firstY)
-        self._island = [location]
+        self._firstX = int(self.width/2)
+        self._firstY = int(self.height/2)
+        self._island = []
 
         self.test = testing("times.csv")
 
+    def resetGame(self):
+        self.reset()
+        location = self.convertToLocation(self._firstX,self._firstY)
+        self._island = [location]
+        self._createDict()
+
     def convertToXY(self, num):
-        y = int(num/self._width) + 1
-        x = int(num % self._width) + 1
+        y = int(num/self.width) + 1
+        x = int(num % self.width) + 1
         return(x,y)
 
     def convertToLocation(self, x,y):
-        location = ((x-1) + (self._width)*(y-1))
+        location = ((x-1) + (self.width)*(y-1))
         return(location)
 
 
@@ -53,7 +72,7 @@ class mineSolver():
         self._remaingBlankSquares = 0
         for location in range(0, self._area):
             x,y = self.convertToXY(location)
-            state = self._game.getTileState(x,y)
+            state = self.getTileState(x,y)
             self._fieldDict[location] = state
             if(state == "blank"):
                 self._remaingBlankSquares += 1
@@ -73,7 +92,7 @@ class mineSolver():
 
                 #Initialization
                 x,y = self.convertToXY(homeLocation)
-                state = self._game.getTileState(x,y) #origin state
+                state = self.getTileState(x,y) #origin state
                 visitedLocations[homeLocation] = False #Puts origin in dict with value false to indicate its not a blank square
                 self._fieldDict[homeLocation] = state
                 dictionarySize = 1 #Speedy way to know the size of visitedLocations
@@ -83,13 +102,13 @@ class mineSolver():
                     x,y = self.convertToXY(homeLocation)
                     for neighbor in neighbors:
                         i,j = neighbor
-                        inBounds = ((i+x > 0) and (j+y > 0) and (i+x < self._width+1) and (j+y < self._height+1)) #In the confinds of the game
+                        inBounds = ((i+x > 0) and (j+y > 0) and (i+x < self.width+1) and (j+y < self.height+1)) #In the confinds of the game
                         neighborLocation = self.convertToLocation(x+i, j+y)
                         inDict = neighborLocation in visitedLocations
                         if(inBounds and not inDict):
                             neighborState = ""
                             if(self._fieldDict[neighborLocation] == "blank"):
-                                neighborState = self._game.getTileState(x+i,y+j)
+                                neighborState = self.getTileState(x+i,y+j)
                                 self._fieldDict[neighborLocation] = neighborState
                             else: #Every nonBlank tile is static no need to update it (saves time)
                                 neighborState = self._fieldDict[neighborLocation]
@@ -111,8 +130,8 @@ class mineSolver():
         Returns location with lowest probability of being a mine
         """
         lowestPercent = 2.0
-        lowestX = 1#int(self._width/2)
-        lowestY = 1#int(self._height/2)
+        lowestX = 1#int(self.width/2)
+        lowestY = 1#int(self.height/2)
         percentDict = {}
 
         for location in range(0, self._area):
@@ -127,10 +146,10 @@ class mineSolver():
                 neighbors = [(-1,1),(0,1),(1,1),(-1,0),(1,0),(-1,-1),(0,-1),(1,-1)]
                 for offset in neighbors:
                     i,j = offset
-                    inBounds = ((i+x > 0) and (j+y > 0) and (i+x < self._width+1) and (j+y < self._height+1))
+                    inBounds = ((i+x > 0) and (j+y > 0) and (i+x < self.width+1) and (j+y < self.height+1))
 
                     if(inBounds):
-                        offsetLocation = ((x+i) + (self._width)*(y+j-1))
+                        offsetLocation = ((x+i) + (self.width)*(y+j-1))
                         if(self._fieldDict[offsetLocation-1] == "blank"):
                             blanks+=1
                             temp.append(offsetLocation)
@@ -157,7 +176,7 @@ class mineSolver():
             if(percentDict[item] < lowest):
                 lowest = percentDict[item]
         #Compare to percentage for a random click
-        mines = self._game.getMinesRemaining()
+        mines = self.getMinesRemaining()
         randomPercent = (mines) / (self._remaingBlankSquares)
         print("Lowest:", lowest)
         print("Random:", randomPercent)
@@ -209,21 +228,16 @@ class mineSolver():
                 flagList.append(item)
         return(flagList)
 
-    def newGame(self):
-        self._game.setDifficulty(level = 3)
-
-    def getMinesRemaining(self):
-        return(self._game.getMinesRemaining())
-
-    def getTime(self):
-        return(self._game.getTime())
-
     def solve(self):
+        """
+        Returns True if a window reset is needed
+        """
         times = []
 
         self._createDict()
         gameOn = True
         while(gameOn):
+
             self.test.start()
             percentDict = self._getPercentages()
             flagList = self._checkForFlagging(percentDict)
@@ -233,35 +247,43 @@ class mineSolver():
                 for coordinates in outputList:
                     x,y = coordinates
                     print("clicking", x, y)
-                    self._game.clickTile(x,y)
+                    self.clickTile(x,y)
+                try:
+                    gameOn = not self.isGameOver()
+                except UNEXPECTED_ALERT_OPEN: #An alert came up saying you got a high score Sel. cant handle this
+                    gameOn = False
+                    return(True)
             else:
                 while(flagList):
                     flagLocation = flagList.pop()
                     x,y = self.convertToXY(flagLocation)
-                    self._game.flagTile(x,y)
+                    self.flagTile(x,y)
                     #Updates the board before clicking anything on screen
             print("updating....")
             self._updateDictNew()
-            gameOn = not (self._game.isGameOver())
             t = self.test.stop()
             print("Lap time: {0}".format(str(t)))
             self.test.update()
 
         self.test.avg()
         self.test.saveAverage()
+        time.sleep(3)
+        return(False)
 
 def main():
     file = fileManagement("stats.csv")
+    game = mineSolver()
     while(True):
-        game = mineSolver()
-        game.solve()
+        game.resetGame()
+        needReset = game.solve()
         mines = game.getMinesRemaining()
         time = game.getTime()
         now = datetime.now()
         string = ("{0},{1},{2}\n".format(str(now),str(mines),str(time)))
         file.appendToFile(string)
-        game.newGame()
-
+        if(needReset):
+            game.closeWebpage()
+            game.open()
 
 
 if __name__ == '__main__':
