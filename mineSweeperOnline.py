@@ -1,17 +1,19 @@
 #-------------------------------------------------------------------------------
 # Name:        mineSweeperOnline interfacer
-# Purpose:
+# Purpose:     To interface with minesweeper.com using selenium
 #
-# Author:      TimRo
+# Author:      finnbarr1
 #
 # Created:     22/08/2018
-# Copyright:   (c) TimRo 2018
-# Licence:     <your licence>
 #-------------------------------------------------------------------------------
 
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import UnexpectedAlertPresentException
+
+class UnexpectedAlertError(UnexpectedAlertPresentException):
+    pass
 
 class mineSweeperOnline():
     def __init__(self):
@@ -85,18 +87,20 @@ class mineSweeperOnline():
 
         - Returns that string value (tileVal)
         """
-
-        xString = str(x)
-        yString = str(y)
-        tile = self._gameElements.find_element_by_id("{0}_{1}".format(yString, xString))
-        raw = tile.get_attribute("class")
-        lastWord = raw.split(" ")[1].strip()
-        lastRaw = raw[-1:]
-        tileVal = lastWord
-        unicode_val = ord(lastRaw)
-        if((unicode_val >= 48) and (unicode_val <= 56)): #If its a 0 - 8
-            tileVal = lastRaw
-        return(tileVal)
+        try:
+            xString = str(x)
+            yString = str(y)
+            tile = self._gameElements.find_element_by_id("{0}_{1}".format(yString, xString))
+            raw = tile.get_attribute("class")
+            lastWord = raw.split(" ")[1].strip()
+            lastRaw = raw[-1:]
+            tileVal = lastWord
+            unicode_val = ord(lastRaw)
+            if((unicode_val >= 48) and (unicode_val <= 56)): #If its a 0 - 8
+                tileVal = lastRaw
+            return(tileVal)
+        except UnexpectedAlertPresentException:
+            raise UnexpectedAlertError(msg = "Unexpected Alert")
 
 
     def clickTile(self, x, y):
