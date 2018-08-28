@@ -275,7 +275,6 @@ class mineSolver():
 
 def main():
     game = mineSolver()
-    needReset = False
     fileLocation = "scores.csv"
     file = fileManagement(fileLocation) #csv with all game scores
     while(True):
@@ -284,7 +283,7 @@ def main():
         try:
             game.solve()
         except UnexpectedAlertError:  #WEBPAGE BRINGS UP ALERT WHEN YOU WIN UGHHHHHH
-            needReset = True #Easy way to handle these pesky alerts
+            game.acceptAlert()
         mines = 0
         now = datetime.now()
         try:
@@ -298,13 +297,9 @@ def main():
             game.acceptAlert()
             finish = int(time.time()) #If we are forced we will use our own measured time elapsed
             gameTime = finish - start
-            needReset = True #Easy way to handle these pesky alerts
-            file.appendToFile("ALERT ACCEPTED SUCCESFULLY\n")
         string = ("{0},{1},{2}\n".format(str(now),str(mines),str(gameTime)))
         file.appendToFile(string)
         print(string)
-        #if(needReset):
-        #    game.resetWeb()
 
 
 if __name__ == '__main__':
