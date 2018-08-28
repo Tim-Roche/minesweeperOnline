@@ -167,12 +167,22 @@ class mineSweeperOnline():
         """
         Returns current mines remaining
         """
-        ones = self._gameElements.find_element_by_id("mines_ones").get_attribute("class")[-1:]
-        tens = self._gameElements.find_element_by_id("mines_tens").get_attribute("class")[-1:]
-        hundreds = self._gameElements.find_element_by_id("mines_hundreds").get_attribute("class")[-1:]
-        mines = hundreds + tens + ones
-        mines = int(mines)
-        return(mines)
+        try:
+            ones = self._gameElements.find_element_by_id("mines_ones").get_attribute("class")[-1:]
+            tens = self._gameElements.find_element_by_id("mines_tens").get_attribute("class")[-1:]
+            hundreds = self._gameElements.find_element_by_id("mines_hundreds").get_attribute("class")[-1:]
+            mines = hundreds + tens + ones
+            mines = int(mines)
+            return(mines)
+        except UnexpectedAlertPresentException:
+            raise UnexpectedAlertError()
+
+    def acceptAlert(self):
+        try:
+            alert = self._driver.switch_to.alert
+            alert.accept()
+        except UnexpectedAlertPresentException:
+            raise UnexpectedAlertError()
 
     def closeWebpage(self):
         self._driver.close()
