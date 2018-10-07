@@ -49,7 +49,7 @@ class mineSweeperOnline():
         level = 4
 
         if("level" in args):
-            level = int(args[arg])
+            level = int(args["level"])
 
         levelDict = {}
         levelDict[1] = "beginner"
