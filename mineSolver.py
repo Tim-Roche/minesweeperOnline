@@ -289,7 +289,7 @@ def main():
         try:
             mines = game.getMinesRemaining()
             gameTime = game.getTime() #We try to use the official game time
-            if(gameTime >= 999): #Official game time maxes out at 999 seconds so we will use ours insted if this happens
+            if(gameTime >= 999): #Official game time maxes out at 999 seconds so we will use ours instead if this happens
                 finish = int(time.time()) #If we are forced we will use our own measured time elapsed
                 gameTime = finish - start
         except UnexpectedAlertError: #UGHHHH I HATE WEBPAGE ALERTS
